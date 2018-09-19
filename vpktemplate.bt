@@ -1,0 +1,83 @@
+// Author: Anciety <anciety512@gmail.com>
+// Version: 0.0.1
+//
+// Currently only vpk2 is supported.
+//
+
+//typedef PathString string <read=PathStringRead>;
+
+//string PathStringRead(string s) {
+//}
+
+DisplayFormatHex();
+
+typedef struct {
+    local string Path;
+    unsigned int CRC;
+    unsigned short PreloadBytes;
+    unsigned short ArchiveIndex;
+    unsigned int EntryOffset;
+    unsigned int EntryLength;
+    unsigned short Terminator;
+
+    if (PreloadBytes > 0) {
+        char preload[PreloadBytes];
+    }
+} VpkFile <read=VpkFileRead>;
+
+string VpkFileRead(VpkFile &f) {
+    return f.Path;
+}
+
+struct {
+    struct {
+        unsigned int Signature;
+        unsigned int Version;
+        unsigned int TreeSize;
+
+        if (file.VpkHeader.Version == 2) {
+            unsigned int FileDataSectionSize;
+            unsigned int ArchiveMD5SectionSize;
+            unsigned int OhterMD5SectionSize;
+            unsigned int SignatureSectionSize;
+        }
+    } VpkHeader;
+
+    local string ext, folder, filename, path;
+    local quad off;
+    while (true) {
+        off = FTell();
+        ext = ReadString(off);
+        FSeek(off + Strlen(ext) + 1);
+        if (Strlen(ext) <= 0) {
+            break;
+        } 
+        //Printf("ext %s %d %d\n", ext, off, off + Strlen(ext));
+        
+
+        while (true) {
+            off = FTell();
+            folder = ReadString(off);
+            FSeek(off + Strlen(folder) + 1);
+            //Printf("folder %s\n", folder);
+            if (Strlen(folder) <= 0) {
+                break;
+            }
+
+            while (true) {
+                off = FTell();
+                filename = ReadString(off);
+                Printf("filename %s\n", filename);
+                FSeek(off + Strlen(filename) + 1);
+                if (Strlen(filename) <= 0) {
+                    break;
+                }
+
+                SPrintf(path, "%s/%s.%s", folder, filename, ext);
+                //Printf("Path %s\n", path);
+                VpkFile vpk;
+                vpk.Path = path;
+            }
+        }
+    }
+} file;

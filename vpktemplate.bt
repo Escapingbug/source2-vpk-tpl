@@ -11,17 +11,37 @@
 
 DisplayFormatHex();
 
+typedef unsigned short ArchiveIndexType <read=ArchiveIndexTypeRead>;
+
+string ArchiveIndexTypeRead(ArchiveIndexType index) {
+    if (index == 0x7fff) {
+        return "Embedded";
+    } else {
+        string s;
+        SPrintf(s, "%x", index);
+        return s;
+    }
+}
+
 typedef struct {
     local string Path;
     unsigned int CRC;
     unsigned short PreloadBytes;
-    unsigned short ArchiveIndex;
+    ArchiveIndexType ArchiveIndex;
     unsigned int EntryOffset;
     unsigned int EntryLength;
     unsigned short Terminator;
 
     if (PreloadBytes > 0) {
         char preload[PreloadBytes];
+    }
+
+    if (ArchiveIndex == 0x7fff) {
+        // Read data from this archive since it is in the same archive
+        local quad off = FTell();
+        FSeek(EntryOffset);
+        uchar data[EntryLength];
+        FSeek(off);
     }
 } VpkFile <read=VpkFileRead>;
 
@@ -67,7 +87,7 @@ struct {
             while (true) {
                 off = FTell();
                 filename = ReadString(off);
-                Printf("filename %s\n", filename);
+                //Printf("filename %s\n", filename);
                 FSeek(off + Strlen(filename) + 1);
                 if (Strlen(filename) <= 0) {
                     break;

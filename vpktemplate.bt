@@ -3,6 +3,9 @@
 //
 // Currently only vpk2 is supported.
 //
+// Reference:
+// https://developer.valvesoftware.com/wiki/VPK_File_Format#File_Format
+//
 
 //typedef PathString string <read=PathStringRead>;
 
